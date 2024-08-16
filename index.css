@@ -1,0 +1,38 @@
+/* define constant */
+:root {
+    --cell-size: 100px;
+}
+
+*{margin: 0; padding:0;}
+body{
+	font-family:arial;
+	background:#8888886c;
+}
+
+#spelplan{
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
+
+#pane{
+	display: grid;
+    grid-template-columns: repeat(5, var(--cell-size));
+    grid-template-rows: repeat(5, var(--cell-size));
+    gap: 5px;
+	border: black 5px solid;
+	background-color: black;
+}
+
+.card{
+	background-color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.img-robot {
+	height: var(--cell-size);
+}
+
