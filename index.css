@@ -36,3 +36,7 @@ body{
 	height: var(--cell-size);
 }
 
+.note {
+	margin-top: 20px;
+}
+
