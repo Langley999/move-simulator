@@ -6,8 +6,21 @@ var activeIndex = 0;
 var curArrow = "ArrowDown";
 var rotationDegree = 0;
 
+// Food system variables
+var score = 0;
+var foods = [];
+var foodTypes = [
+    { name: 'apple', emoji: '🍎', points: 1, speed: 2000, color: '#ff4444' },
+    { name: 'banana', emoji: '🍌', points: 2, speed: 1500, color: '#ffdd44' },
+    { name: 'orange', emoji: '🍊', points: 3, speed: 1200, color: '#ff8844' },
+    { name: 'grape', emoji: '🍇', points: 4, speed: 900, color: '#8844ff' },
+    { name: 'cherry', emoji: '🍒', points: 5, speed: 600, color: '#ff0044' }
+];
+
 // Move initialize panel to a function and execute here
 initPanel();
+// Start the food system
+startFoodSystem();
 
 var cards = document.getElementById("pane").getElementsByClassName("card");
 window.addEventListener('keydown', function(e) {
@@ -43,6 +56,8 @@ window.addEventListener('keydown', function(e) {
 			// update arrow and active index
 			curArrow = e.key;
 			activeIndex = newActiveIndex;
+			// Check for food collision after moving
+			checkCollisions();
 		}
 		// prevent default handling of up, down, left, right keys
 		e.preventDefault();
@@ -111,3 +126,123 @@ function initPanel() {
 	drawRobot(firstCard);
 }
 
+/////////////////////////////////////////Food System Functions/////////////////////////////////////////
+// Start the food system
+function startFoodSystem() {
+	// Create initial food
+	createFood();
+	// Start checking for collisions
+	setInterval(checkCollisions, 100);
+}
+
+// Create a new food item
+function createFood() {
+	// Remove existing food if any
+	removeAllFood();
+	
+	// Select random food type
+	const foodType = foodTypes[Math.floor(Math.random() * foodTypes.length)];
+	
+	// Select random position (avoid robot position)
+	let position;
+	do {
+		position = Math.floor(Math.random() * PANEL_SIZE * PANEL_SIZE);
+	} while (position === activeIndex);
+	
+	// Create food object
+	const food = {
+		type: foodType,
+		position: position,
+		element: null,
+		moveInterval: null
+	};
+	
+	// Create DOM element
+	const foodElement = document.createElement('div');
+	foodElement.className = `food ${foodType.name}`;
+	foodElement.textContent = foodType.emoji;
+	foodElement.style.position = 'absolute';
+	
+	// Position the food in the grid
+	positionFood(foodElement, position);
+	
+	// Add to DOM
+	document.getElementById('pane').appendChild(foodElement);
+	
+	// Store references
+	food.element = foodElement;
+	foods.push(food);
+	
+	// Start moving the food
+	startFoodMovement(food);
+}
+
+// Position food element in the grid
+function positionFood(element, position) {
+	const row = Math.floor(position / PANEL_SIZE);
+	const col = position % PANEL_SIZE;
+	const cellSize = 100; // matches CSS --cell-size
+	const gap = 5; // matches CSS gap
+	
+	element.style.left = (col * (cellSize + gap) + cellSize/2 - 30) + 'px';
+	element.style.top = (row * (cellSize + gap) + cellSize/2 - 30) + 'px';
+}
+
+// Start food movement
+function startFoodMovement(food) {
+	food.moveInterval = setInterval(() => {
+		moveFood(food);
+	}, food.type.speed);
+}
+
+// Move food to a new random position
+function moveFood(food) {
+	let newPosition;
+	do {
+		newPosition = Math.floor(Math.random() * PANEL_SIZE * PANEL_SIZE);
+	} while (newPosition === activeIndex || newPosition === food.position);
+	
+	food.position = newPosition;
+	positionFood(food.element, newPosition);
+}
+
+// Check for collisions between robot and food
+function checkCollisions() {
+	foods.forEach((food, index) => {
+		if (food.position === activeIndex) {
+			// Collision detected!
+			eatFood(food, index);
+		}
+	});
+}
+
+// Handle eating food
+function eatFood(food, index) {
+	// Add points to score
+	score += food.type.points;
+	updateScoreDisplay();
+	
+	// Remove food
+	clearInterval(food.moveInterval);
+	food.element.remove();
+	foods.splice(index, 1);
+	
+	// Create new food after a short delay
+	setTimeout(createFood, 500);
+}
+
+// Remove all food from the game
+function removeAllFood() {
+	foods.forEach(food => {
+		clearInterval(food.moveInterval);
+		if (food.element && food.element.parentNode) {
+			food.element.remove();
+		}
+	});
+	foods = [];
+}
+
+// Update score display
+function updateScoreDisplay() {
+	document.getElementById('score').textContent = score;
+}

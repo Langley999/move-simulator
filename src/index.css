@@ -9,11 +9,52 @@ body{
 	background:#8888886c;
 }
 
+#game-container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	min-height: 100vh;
+	gap: 30px;
+}
+
+#scoreboard {
+	background: white;
+	padding: 20px;
+	border-radius: 10px;
+	box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+	min-width: 200px;
+}
+
+#scoreboard h2 {
+	margin-bottom: 15px;
+	color: #333;
+}
+
+#score {
+	color: #007bff;
+	font-weight: bold;
+}
+
+#food-legend h3 {
+	margin-bottom: 10px;
+	color: #333;
+	font-size: 16px;
+}
+
+.legend-item {
+	display: flex;
+	align-items: center;
+	margin-bottom: 5px;
+	font-size: 14px;
+}
+
+.food-sample {
+	margin-right: 8px;
+	font-size: 16px;
+}
+
 #spelplan{
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
+	position: relative;
 }
 
 #pane{
@@ -40,3 +81,22 @@ body{
 	margin-top: 20px;
 }
 
+/* Food styles */
+.food {
+	font-size: 60px;
+	position: absolute;
+	z-index: 10;
+	transition: all 0.1s ease;
+	cursor: pointer;
+}
+
+/* Animation for food movement */
+@keyframes foodMove {
+	0% { transform: scale(1); }
+	50% { transform: scale(1.1); }
+	100% { transform: scale(1); }
+}
+
+.food:hover {
+	animation: foodMove 0.3s ease-in-out;
+}

@@ -6,12 +6,25 @@
     <link rel="stylesheet" href="index.css">
 </head>
 <body>
-<div id="spelplan">
-  <div id="pane" />
+<div id="game-container">
+  <div id="scoreboard">
+    <h2>Score: <span id="score">0</span></h2>
+    <div id="food-legend">
+      <h3>Food Types:</h3>
+      <div class="legend-item"><span class="food-sample">🍎</span> Apple (1 pt, slow)</div>
+      <div class="legend-item"><span class="food-sample">🍌</span> Banana (2 pts, medium-slow)</div>
+      <div class="legend-item"><span class="food-sample">🍊</span> Orange (3 pts, medium)</div>
+      <div class="legend-item"><span class="food-sample">🍇</span> Grape (4 pts, medium-fast)</div>
+      <div class="legend-item"><span class="food-sample">🍒</span> Cherry (5 pts, fast)</div>
+    </div>
+  </div>
+  <div id="spelplan">
+    <div id="pane" />
+  </div>
 </div>
 <script src="index.js"></script>
 <div class="note">
-  Please use the arrow keys to move the robot around the board.
+  Please use the arrow keys to move the robot around the board and catch the moving food!
 </div>
 </body>
 </html>
