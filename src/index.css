@@ -35,6 +35,42 @@ body{
 	font-weight: bold;
 }
 
+#level {
+	color: #28a745;
+	font-weight: bold;
+}
+
+#timer-container {
+	margin-bottom: 15px;
+	padding: 10px;
+	background: #f8f9fa;
+	border-radius: 5px;
+	border: 2px solid #dee2e6;
+}
+
+#timer-container h3 {
+	margin: 0;
+	color: #333;
+	font-size: 16px;
+}
+
+#timer {
+	color: #dc3545;
+	font-weight: bold;
+	font-size: 18px;
+}
+
+#timer.warning {
+	color: #ff6b35;
+	animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+	0% { opacity: 1; }
+	50% { opacity: 0.5; }
+	100% { opacity: 1; }
+}
+
 #food-legend h3 {
 	margin-bottom: 10px;
 	color: #333;

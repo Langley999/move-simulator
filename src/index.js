@@ -6,9 +6,19 @@ var activeIndex = 0;
 var curArrow = "ArrowDown";
 var rotationDegree = 0;
 
-// Food system variables
+// Game system variables
 var score = 0;
+var currentLevel = 1;
+var maxLevel = 5;
+var levelTimeLimit = 60; // 60 seconds per level
+var timeLeft = levelTimeLimit;
+var gameTimer = null;
+var gameActive = true;
+
+// Food system variables
 var foods = [];
+var foodTimeout = 30; // 30 seconds per food item
+var currentFoodTimer = null;
 var foodTypes = [
     { name: 'apple', emoji: '🍎', points: 1, speed: 2000, color: '#ff4444' },
     { name: 'banana', emoji: '🍌', points: 2, speed: 1500, color: '#ffdd44' },
@@ -19,8 +29,8 @@ var foodTypes = [
 
 // Move initialize panel to a function and execute here
 initPanel();
-// Start the food system
-startFoodSystem();
+// Start the game system
+startGame();
 
 var cards = document.getElementById("pane").getElementsByClassName("card");
 window.addEventListener('keydown', function(e) {
@@ -137,6 +147,9 @@ function startFoodSystem() {
 
 // Create a new food item
 function createFood() {
+	// Only create food if game is active
+	if (!gameActive) return;
+	
 	// Remove existing food if any
 	removeAllFood();
 	
@@ -175,6 +188,9 @@ function createFood() {
 	
 	// Start moving the food
 	startFoodMovement(food);
+	
+	// Start the 30-second food timer
+	startFoodTimer();
 }
 
 // Position food element in the grid
@@ -222,6 +238,9 @@ function eatFood(food, index) {
 	score += food.type.points;
 	updateScoreDisplay();
 	
+	// Clear the food timer since food was eaten
+	clearFoodTimer();
+	
 	// Remove food
 	clearInterval(food.moveInterval);
 	food.element.remove();
@@ -245,4 +264,169 @@ function removeAllFood() {
 // Update score display
 function updateScoreDisplay() {
 	document.getElementById('score').textContent = score;
+}
+
+/////////////////////////////////////////Game System Functions/////////////////////////////////////////
+// Start the game system
+function startGame() {
+	// Initialize displays
+	updateLevelDisplay();
+	updateTimerDisplay();
+	
+	// Start the food system
+	startFoodSystem();
+	
+	// Start the level timer
+	startLevelTimer();
+}
+
+// Start level timer
+function startLevelTimer() {
+	if (gameTimer) {
+		clearInterval(gameTimer);
+	}
+	
+	gameTimer = setInterval(() => {
+		if (gameActive) {
+			timeLeft--;
+			updateTimerDisplay();
+			
+			// Add warning animation when time is low
+			const timerElement = document.getElementById('timer');
+			if (timeLeft <= 10) {
+				timerElement.classList.add('warning');
+			} else {
+				timerElement.classList.remove('warning');
+			}
+			
+			// Check if time is up
+			if (timeLeft <= 0) {
+				endLevel();
+			}
+		}
+	}, 1000);
+}
+
+// End current level
+function endLevel() {
+	// Check if player has enough score to advance
+	if (score >= 20) {
+		// Player can advance to next level
+		if (currentLevel < maxLevel) {
+			advanceToNextLevel();
+		} else {
+			// Player completed all levels
+			gameWon();
+		}
+	} else {
+		// Player didn't reach required score
+		gameOver();
+	}
+}
+
+// Advance to next level
+function advanceToNextLevel() {
+	currentLevel++;
+	score = 0; // Reset score for new level
+	timeLeft = levelTimeLimit; // Reset timer
+	
+	// Update displays
+	updateLevelDisplay();
+	updateScoreDisplay();
+	updateTimerDisplay();
+	
+	// Remove warning class
+	document.getElementById('timer').classList.remove('warning');
+	
+	// Show level advancement message
+	showMessage(`Level ${currentLevel}! You need 20 points to advance.`, 3000);
+	
+	// Create new food
+	createFood();
+}
+
+// Game won (completed all levels)
+function gameWon() {
+	gameActive = false;
+	clearInterval(gameTimer);
+	removeAllFood();
+	clearFoodTimer();
+	
+	showMessage('Congratulations! You completed all 5 levels!', 0);
+}
+
+// Game over (didn't reach required score)
+function gameOver() {
+	gameActive = false;
+	clearInterval(gameTimer);
+	removeAllFood();
+	clearFoodTimer();
+	
+	showMessage(`Game Over! You needed 20 points but only got ${score}. Refresh to try again.`, 0);
+}
+
+// Show message to player
+function showMessage(message, duration) {
+	// Create message element if it doesn't exist
+	let messageElement = document.getElementById('game-message');
+	if (!messageElement) {
+		messageElement = document.createElement('div');
+		messageElement.id = 'game-message';
+		messageElement.style.cssText = `
+			position: fixed;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			background: rgba(0, 0, 0, 0.9);
+			color: white;
+			padding: 20px;
+			border-radius: 10px;
+			font-size: 18px;
+			font-weight: bold;
+			text-align: center;
+			z-index: 1000;
+			max-width: 400px;
+		`;
+		document.body.appendChild(messageElement);
+	}
+	
+	messageElement.textContent = message;
+	messageElement.style.display = 'block';
+	
+	// Hide message after duration (if duration > 0)
+	if (duration > 0) {
+		setTimeout(() => {
+			messageElement.style.display = 'none';
+		}, duration);
+	}
+}
+
+// Update level display
+function updateLevelDisplay() {
+	document.getElementById('level').textContent = currentLevel;
+}
+
+// Update timer display
+function updateTimerDisplay() {
+	document.getElementById('timer').textContent = timeLeft;
+}
+
+// Start food timer (30 second timeout)
+function startFoodTimer() {
+	clearFoodTimer();
+	
+	currentFoodTimer = setTimeout(() => {
+		if (gameActive && foods.length > 0) {
+			// Time's up for current food, create new one
+			createFood();
+		}
+	}, foodTimeout * 1000);
+}
+
+// Clear food timer
+function clearFoodTimer() {
+	if (currentFoodTimer) {
+		clearTimeout(currentFoodTimer);
+		currentFoodTimer = null;
+	}
 }
